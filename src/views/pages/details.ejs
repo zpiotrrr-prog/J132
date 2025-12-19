@@ -1,0 +1,121 @@
+<%- include('../partials/header') %>
+
+<div style="max-width: 800px; margin: 0 auto; padding: 0 20px;">
+  <div class="recipe-details card">
+  <h2><%= recipe.recipe_name %></h2>
+    
+  <div class="detail-item">
+    <label>Czas wymagany:</label>
+    <span><%= recipe.required_time %> minut</span>
+  </div>
+    
+  <div class="detail-item">
+    <label>Opis:</label>
+    <span><%= recipe.description %></span>
+  </div>
+    
+  <div class="mt-1">
+    <a href="/" class="btn btn-secondary">← Powrót do listy</a>
+  </div>
+</div>
+
+<div class="comments-section">
+  <h3>Komentarze</h3>
+  <div class="add-comment-form">
+    <h4>Dodaj komentarz:</h4>
+    <form id="comment-form">
+      <div class="form-group">
+        <input type="text" id="comment-username" name="username" placeholder="Twoja nazwa (opcjonalnie)">
+      </div>
+      <div class="form-group">
+        <textarea id="comment-text" name="text" placeholder="Wpisz swój komentarz..." required></textarea>
+      </div>
+      <button type="submit" onclick="addComment(event, '<%= recipe._id %>')">Dodaj komentarz</button>
+    </form>
+  </div>
+    
+  <% if (typeof comments !== 'undefined' && comments.length > 0) { %>
+    <div class="comments-list">
+      <% comments.forEach(comment => { %>
+        <div class="comment-item">
+          <div class="comment-header">
+            <span class="comment-author"> <%= comment.username %></span>
+            <span class="comment-date"><%= new Date(comment.createdAt).toLocaleDateString('pl-PL') %> <%= new Date(comment.createdAt).toLocaleTimeString('pl-PL') %></span>
+          </div>
+          <p class="comment-text"><%= comment.text %></p>
+            <button class="comment-delete" onclick="deleteComment(event, '<%= comment._id %>')">Usuń</button>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="no-comments">
+      Brak komentarzy. Bądź pierwszy i dodaj komentarz!
+    </div>
+  <% } %>
+</div>
+
+<script>
+async function addComment(event, recipeId) {
+  event.preventDefault();
+  const text = document.getElementById('comment-text').value.trim();
+
+  if (!text) {
+    alert('Wpisz treść komentarza!');
+    return;
+  }
+  const username = document.getElementById('comment-username').value.trim();
+
+  try {
+    const response = await fetch('/comment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        recipeId: recipeId,
+        text: text,
+        username: username
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      location.reload();
+    } else {
+      alert(data.error || 'Błąd przy dodawaniu komentarza');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Błąd przy dodawaniu komentarza');
+  }
+}
+
+async function deleteComment(event, commentId) {
+  event.preventDefault();
+
+  if (!confirm('Czy na pewno chcesz usunąć ten komentarz?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/comment/${commentId}/delete`, {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      location.reload();
+    } else {
+      alert(data.error || 'Błąd przy usuwaniu komentarza');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Błąd przy usuwaniu komentarza');
+  }
+}
+</script>
+</div>
+
+<%- include('../partials/footer') %>

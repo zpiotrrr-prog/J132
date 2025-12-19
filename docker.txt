@@ -1,0 +1,484 @@
+🍳 DOCKER SETUP & INSTALLATION GUIDE - MongoDB
+==============================================
+
+Project Database: recipes
+App Port: 3000
+MongoDB Port: 27017
+MongoDB Version: 6.0
+
+For complete project description, see: README.md
+
+
+═══════════════════════════════════════════════════
+QUICK START (RECOMMENDED)
+═══════════════════════════════════════════════════
+
+Run this single command to start MongoDB:
+
+  docker run -d \
+    --name recipes-mongo \
+    -p 27017:27017 \
+    -v mongo-recipes-data:/data/db \
+    mongo:6.0
+
+This will:
+  ✓ Start MongoDB 6.0 in background
+  ✓ Container name: recipes-mongo
+  ✓ Port: 27017 (host:container)
+  ✓ Data volume: mongo-recipes-data
+  ✓ Network: accessible on localhost
+  
+Create Connection in MongoDB named recipes
+
+═══════════════════════════════════════════════════
+MONGODB CONNECTION DETAILS
+═══════════════════════════════════════════════════
+
+Connection String:
+  mongodb://localhost:27017
+
+Database Name:
+  recipes
+
+Collections:
+  - recipes     (cooking recipes)
+  - comments    (recipe comments)
+
+Authentication:
+  ✓ MongoDB 6.0 runs without authentication by default
+  ✓ Suitable for local development
+  ⚠ For production, see: "Production Security" section
+
+
+═══════════════════════════════════════════════════
+STEP-BY-STEP INSTALLATION
+═══════════════════════════════════════════════════
+
+Step 1: Verify Docker is installed
+  docker --version
+  docker ps
+
+Step 2: Pull MongoDB image (optional, docker run does this)
+  docker pull mongo:6.0
+
+Step 3: Run MongoDB container
+  docker run -d \
+    --name recipes-mongo \
+    -p 27017:27017 \
+    -v mongo-recipes-data:/data/db \
+    mongo:6.0
+
+Step 4: Verify MongoDB is running
+  docker ps
+  (Look for "recipes-mongo" in the list)
+
+Step 5: Navigate to project
+  cd c:\Users\User\Desktop\SZKOLA\node\Projekt
+
+Step 6: Install Node dependencies
+  npm install
+
+Step 7: Start Node application
+  npm start
+
+Step 8: Open in browser
+  http://localhost:3000
+
+✅ Done! Application is running.
+
+
+═══════════════════════════════════════════════════
+MONGODB PORT MAPPING EXPLAINED
+═══════════════════════════════════════════════════
+
+Flag: -p 27017:27017
+
+  -p HOST_PORT:CONTAINER_PORT
+  
+  27017  = Port on your computer (host)
+  27017  = Port inside Docker container
+  
+  Mapping: localhost:27017 → Docker container:27017
+
+Alternative Port Mapping:
+  
+  docker run -d \
+    --name recipes-mongo \
+    -p 27018:27017 \
+    -v mongo-recipes-data:/data/db \
+    mongo:6.0
+  
+  This maps: localhost:27018 → container:27017
+  Update src/data/connection.js to: mongodb://localhost:27018
+
+
+═══════════════════════════════════════════════════
+MONGODB AUTHENTICATION (Optional for Production)
+═══════════════════════════════════════════════════
+
+To enable authentication:
+
+  docker run -d \
+    --name recipes-mongo \
+    -p 27017:27017 \
+    -v mongo-recipes-data:/data/db \
+    -e MONGO_INITDB_ROOT_USERNAME=admin \
+    -e MONGO_INITDB_ROOT_PASSWORD=securepw123 \
+    mongo:6.0
+
+Connection with auth:
+  mongodb://admin:securepw123@localhost:27017
+
+Update src/data/connection.js:
+  const uri = 'mongodb://admin:securepw123@localhost:27017';
+
+
+═══════════════════════════════════════════════════
+DOCKER COMMANDS REFERENCE
+═══════════════════════════════════════════════════
+
+Check Status:
+  docker ps                     # Running containers
+  docker ps -a                  # All containers (stopped too)
+
+Start/Stop Container:
+  docker start recipes-mongo    # Start stopped container
+  docker stop recipes-mongo     # Stop running container
+  docker restart recipes-mongo  # Restart container
+
+View Information:
+  docker logs recipes-mongo     # View container logs
+  docker logs -f recipes-mongo  # Follow logs in real-time
+  docker inspect recipes-mongo  # Detailed container info
+
+Remove/Clean:
+  docker rm recipes-mongo       # Remove container (keeps data)
+  docker volume rm mongo-recipes-data  # Delete data volume
+  docker system prune           # Clean all unused resources
+
+Port Verification:
+  # Windows
+  netstat -ano | findstr :27017
+  
+  # macOS/Linux
+  lsof -i :27017
+
+
+═══════════════════════════════════════════════════
+MONGODB SHELL ACCESS
+═══════════════════════════════════════════════════
+
+Connect to MongoDB (requires mongosh installed):
+  mongosh mongodb://localhost:27017
+
+Or connect inside container:
+  docker exec -it recipes-mongo mongosh
+
+Common Commands:
+  show dbs                      # List all databases
+  use recipes                   # Switch to recipes database
+  show collections              # List collections
+  db.recipes.find()             # Find all recipes
+  db.comments.find()            # Find all comments
+  db.recipes.find().pretty()    # Pretty-print results
+  db.recipes.insertOne({...})   # Insert a document
+  db.recipes.deleteMany({})     # Delete all documents
+  db.recipes.drop()             # Drop entire collection
+
+
+═══════════════════════════════════════════════════
+VOLUME & DATA PERSISTENCE
+═══════════════════════════════════════════════════
+
+Volume Management:
+  docker volume ls              # List all volumes
+  docker volume inspect mongo-recipes-data  # Details
+  docker volume rm mongo-recipes-data  # Delete volume
+
+Data Persistence:
+  ✓ Volume mongo-recipes-data persists data
+  ✓ Survives container stop/start
+  ✗ Deleted only with: docker volume rm
+
+Bind Mount (Alternative to Volume):
+  docker run -d \
+    --name recipes-mongo \
+    -p 27017:27017 \
+    -v /path/to/data:/data/db \
+    mongo:6.0
+  
+  Replace /path/to/data with actual path
+
+
+═══════════════════════════════════════════════════
+DOCKER COMPOSE (Alternative to docker run)
+═══════════════════════════════════════════════════
+
+Create file: docker-compose.yml
+
+  version: '3.8'
+  
+  services:
+    mongodb:
+      image: mongo:6.0
+      container_name: recipes_mongo
+      restart: always
+      ports:
+        - "27017:27017"
+      volumes:
+        - mongo_recipes_data:/data/db
+      environment:
+        - MONGO_INITDB_DATABASE=recipes
+      networks:
+        - recipes_network
+  
+  volumes:
+    mongo_recipes_data:
+      driver: local
+  
+  networks:
+    recipes_network:
+      driver: bridge
+
+Run:
+  docker-compose up -d
+
+Stop:
+  docker-compose down
+
+View logs:
+  docker-compose logs -f mongodb
+
+
+═══════════════════════════════════════════════════
+MONGODB NETWORK ACCESS
+═══════════════════════════════════════════════════
+
+Connection Sources:
+  
+  ✓ From host machine:
+    mongodb://localhost:27017
+    mongodb://127.0.0.1:27017
+  
+  ✓ From other Docker container (same network):
+    mongodb://recipes-mongo:27017  (use container name)
+  
+  ✗ From remote server:
+    Not accessible by default (Docker isolates containers)
+
+To access from other containers:
+  docker run --network recipes_network ...
+
+
+═══════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════
+
+Problem: "Cannot connect to MongoDB"
+  Solution:
+    1. Check Docker running: docker ps
+    2. Check container active: docker ps | grep recipes-mongo
+    3. Check logs: docker logs recipes-mongo
+    4. Verify connection string in src/data/connection.js
+
+Problem: "Port 27017 already in use"
+  Solution:
+    1. Stop existing container: docker stop recipes-mongo
+    2. Or use different port: -p 27018:27017
+    3. Update connection string to: mongodb://localhost:27018
+
+Problem: "Docker command not found"
+  Solution:
+    1. Install Docker Desktop
+    2. Add Docker to PATH environment variable
+    3. Restart terminal
+    4. Verify: docker --version
+
+Problem: "Container exits immediately"
+  Solution:
+    1. Check logs: docker logs recipes-mongo
+    2. Common issues: port conflict, volume permission
+    3. Try with different port: -p 27018:27017
+
+Problem: "Permission denied accessing volume"
+  Solution (macOS/Linux):
+    sudo chown -R 999:999 /path/to/volume
+  
+  Solution (Windows):
+    Docker Desktop handles permissions automatically
+
+Problem: "Data lost after stopping container"
+  Solution:
+    ✓ Always use volumes: -v mongo-recipes-data:/data/db
+    ✓ Don't use: docker rm (use docker stop instead)
+    ✓ Check volume exists: docker volume ls
+
+Problem: "mongosh: command not found"
+  Solution:
+    1. Install mongosh: npm install -g mongosh
+    2. Or access via container: docker exec -it recipes-mongo mongosh
+
+
+═══════════════════════════════════════════════════
+MONGODB BACKUP & RESTORE
+═══════════════════════════════════════════════════
+
+Backup Database:
+  docker exec recipes-mongo mongodump \
+    --out /tmp/backup \
+    --db recipes
+  
+  docker cp recipes-mongo:/tmp/backup ./backup
+
+Restore Database:
+  docker cp ./backup recipes-mongo:/tmp/
+  
+  docker exec recipes-mongo mongorestore \
+    --db recipes \
+    /tmp/backup/recipes
+
+
+═══════════════════════════════════════════════════
+DEVELOPMENT SETUP
+═══════════════════════════════════════════════════
+
+Install nodemon for auto-restart on file changes:
+  npm install --save-dev nodemon
+
+Add to package.json:
+  "dev": "nodemon src/server.js"
+
+Run development:
+  npm run dev
+
+This will restart Node when you change code.
+
+
+═══════════════════════════════════════════════════
+PRODUCTION SECURITY (Best Practices)
+═══════════════════════════════════════════════════
+
+⚠ DO NOT use default MongoDB in production!
+
+Secure MongoDB Setup:
+  
+  docker run -d \
+    --name recipes-mongo \
+    -p 27017:27017 \
+    -v mongo-recipes-data:/data/db \
+    -e MONGO_INITDB_ROOT_USERNAME=admin \
+    -e MONGO_INITDB_ROOT_PASSWORD=<strong-password> \
+    -e MONGO_INITDB_DATABASE=recipes \
+    --network production-network \
+    mongo:6.0 --auth
+
+Best Practices:
+  ✓ Always use authentication
+  ✓ Use strong passwords
+  ✓ Restrict network access
+  ✓ Keep MongoDB updated
+  ✓ Regular backups
+  ✓ Monitor logs
+  ✓ Use environment variables for secrets
+  ✓ Don't expose port publicly
+
+
+═══════════════════════════════════════════════════
+CLEANUP & RESET
+═══════════════════════════════════════════════════
+
+Stop Everything:
+  docker stop recipes-mongo
+
+Remove Container (keeps data):
+  docker rm recipes-mongo
+
+Remove Data (deletes everything):
+  docker volume rm mongo-recipes-data
+  docker rm recipes-mongo
+
+Complete Reset:
+  docker stop recipes-mongo
+  docker rm recipes-mongo
+  docker volume rm mongo-recipes-data
+  docker pull mongo:6.0
+
+Then start fresh with Quick Start command.
+
+
+═══════════════════════════════════════════════════
+FINAL CHECKLIST
+═══════════════════════════════════════════════════
+
+Before running the application:
+
+  ☐ Docker is installed (docker --version)
+  ☐ Docker Desktop is running
+  ☐ MongoDB container is active (docker ps)
+  ☐ Port 27017 is accessible
+  ☐ Node.js v14+ is installed (node --version)
+  ☐ npm install completed without errors
+  ☐ npm start runs without errors
+  ☐ App is accessible at http://localhost:3000
+  ☐ MongoDB connection shows in logs (no errors)
+  ☐ Can create a recipe
+  ☐ Can add comment to recipe
+  ☐ Can delete recipe
+  ☐ Data persists after restart
+
+All checked? You're ready to go! 🎉
+
+
+═══════════════════════════════════════════════════
+QUICK REFERENCE CHEATSHEET
+═══════════════════════════════════════════════════
+
+Start MongoDB:
+  docker run -d --name recipes-mongo -p 27017:27017 -v mongo-recipes-data:/data/db mongo:6.0
+
+Check status:
+  docker ps | grep recipes-mongo
+
+View logs:
+  docker logs recipes-mongo
+
+Stop:
+  docker stop recipes-mongo
+
+Start:
+  docker start recipes-mongo
+
+Connect (inside container):
+  docker exec -it recipes-mongo mongosh
+
+Remove:
+  docker rm recipes-mongo
+
+Clean all:
+  docker system prune -a
+
+
+═══════════════════════════════════════════════════
+RESOURCES & DOCUMENTATION
+═══════════════════════════════════════════════════
+
+Docker:
+  https://docs.docker.com/
+  https://docs.docker.com/engine/reference/commandline/run/
+
+MongoDB:
+  https://docs.mongodb.com/
+  https://docs.mongodb.com/manual/introduction/
+  https://hub.docker.com/_/mongo
+
+MongoDB Shell (mongosh):
+  https://www.mongodb.com/products/shell
+  https://docs.mongodb.com/mongodb-shell/
+
+Node.js MongoDB Driver:
+  https://docs.mongodb.com/drivers/node/
+
+═══════════════════════════════════════════════════
+
+For full project details, see: README.md
+Questions? Check Docker and MongoDB documentation above.

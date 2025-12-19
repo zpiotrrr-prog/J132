@@ -1,0 +1,33 @@
+<%- include('../partials/header') %>
+
+<div style="max-width: 600px; margin: 0 auto; padding: 0 20px;">
+  <form action="/recipe/new" method="POST">
+  <h2>Dodaj nowy przepis</h2>
+    
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+    
+  <div class="form-group">
+    <label for="recipe_name">Nazwa przepisu:</label>
+    <input type="text" id="recipe_name" name="recipe_name" placeholder="np. Spaghetti Bolognese" minlength="3" required>
+    <small class="form-note">Min. 3 znaki</small>
+  </div>
+    
+  <div class="form-group">
+    <label for="required_time">Czas przygotowania (minuty):</label>
+    <input type="number" id="required_time" name="required_time" placeholder="np. 30" min="1" required>
+  </div>
+    
+  <div class="form-group">
+    <label for="description">Opis/Instrukcja:</label>
+    <textarea id="description" name="description" placeholder="Wpisz szczegółowy opis i instrukcję przygotowania..." minlength="10" required></textarea>
+    <small class="form-note">Min. 10 znaków</small>
+  </div>
+    
+  <button type="submit" class="btn btn-primary">Zapisz przepis</button>
+  <a href="/" class="btn btn-secondary" style="margin-left: 10px;">Anuluj</a>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

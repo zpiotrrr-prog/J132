@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+  <div class="page-header">
+  <h2>Lista Przepisów</h2>
+  <p class="lead">Przeglądaj i odkrywaj przepisy kulinarne</p>
+</div>
+
+
+<div class="card filter-panel card--shadow">
+  <h3>Filtrowanie i sortowanie</h3>
+    
+  <form method="GET" action="/" class="filter-form">
+    <div class="form-group mb-0">
+      <label for="search">Szukaj receptury:</label>
+      <input type="text" id="search" name="search" placeholder="Wpisz nazwę..." value="<%= filters.search %>">
+    </div>
+        
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="minTime">Od (min):</label>
+      <input type="number" id="minTime" name="minTime" placeholder="0" value="<%= filters.minTime %>" min="0">
+    </div>
+        
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="maxTime">Do (min):</label>
+      <input type="number" id="maxTime" name="maxTime" placeholder="999" value="<%= filters.maxTime %>" min="0">
+    </div>
+
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="sortBy">Sortuj po:</label>
+      <select id="sortBy" name="sortBy">
+        <option value="createdAt" <% if (filters.sortBy === 'createdAt') { %>selected<% } %>>Data dodania</option>
+        <option value="recipe_name" <% if (filters.sortBy === 'recipe_name') { %>selected<% } %>>Nazwa</option>
+        <option value="required_time" <% if (filters.sortBy === 'required_time') { %>selected<% } %>>Czas przygotowania</option>
+      </select>
+    </div>
+        
+
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="sortOrder">Kolejność:</label>
+      <select id="sortOrder" name="sortOrder">
+        <option value="desc" <% if (filters.sortOrder === 'desc') { %>selected<% } %>>Malejąco</option>
+        <option value="asc" <% if (filters.sortOrder === 'asc') { %>selected<% } %>>Rosnąco</option>
+      </select>
+    </div>
+        
+    <button type="submit" class="btn btn-primary btn--full">Szukaj</button>
+    <a href="/" class="btn btn-secondary btn--full">Wyczyść filtry</a>
+  </form>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-error"><%= error %></div>
+<% } %>
+
+<% if (recipes.length === 0) { %>
+  <div class="text-center" style="padding: 60px 20px;">
+    <h3 style="color: #999;">Brak przepisów</h3>
+    <p><a href="/recipe/new" class="btn btn-primary" style="margin-top: 20px;">Dodaj pierwszy przepis</a></p>
+  </div>
+<% } else { %>
+  <div class="meta">
+    <p>Znalezione przepisy: <strong><%= recipes.length %></strong></p>
+  </div>
+    
+  <div class="recipes-container">
+    <% recipes.forEach(recipe => { %>
+      <div class="recipe-card">
+        <div class="recipe-header">
+          <h3><%= recipe.recipe_name %></h3>
+          <div class="recipe-meta">
+            <span><%= recipe.required_time %> min</span>
+            <span>📅 <%= new Date(recipe.createdAt).toLocaleDateString('pl-PL') %></span>
+          </div>
+        </div>
+        <div class="recipe-body">
+          <p class="recipe-description"><%= recipe.description %></p>
+          <div class="recipe-actions">
+            <a href="/recipe/<%= recipe._id %>/details" class="btn btn-secondary btn--grow">Pokaż szczegóły</a>
+            <a href="/recipe/<%= recipe._id %>/edit" class="btn btn-secondary btn--small">Edytuj</a>
+            <form action="/recipe/<%= recipe._id %>/delete" method="POST" class="btn--small" style="margin:0;">
+              <button type="submit" class="btn btn-danger btn--full">Usuń</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+</div>
+
+<%- include('../partials/footer') %>
