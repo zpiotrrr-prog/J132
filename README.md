@@ -63,7 +63,7 @@ cd J132
 - **Docker** (or Docker Desktop)
 - **Git** (optional)
 
-### Step 1: Start MongoDB with Docker
+
 
 # Run MongoDB 6.0 in background
 Check [docker.txt](docker.txt) for informations.
