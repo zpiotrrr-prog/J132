@@ -15,11 +15,8 @@ QUICK START (RECOMMENDED)
 
 Run this single command to start MongoDB:
 
-  docker run -d \
-    --name recipes-mongo \
-    -p 27017:27017 \
-    -v mongo-recipes-data:/data/db \
-    mongo:6.0
+  docker run -d --name recipes-mongo -p 27017:27017 -v mongo-recipes-data:/data/db mongo:6.0
+
 
 This will:
   ✓ Start MongoDB 6.0 in background
